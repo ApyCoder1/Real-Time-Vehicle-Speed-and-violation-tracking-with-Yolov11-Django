@@ -9,8 +9,9 @@ This project is an advanced Vehicle Speed Detection and Tracking System using YO
 ✅ Attractive Dashboard for data visualization (total vehicles, top speeders, violations, etc.)
 ✅ Custom Speed Limit Monitoring to detect overspeeding vehicles
 📌 Installation Guide
-1️⃣ Clone the Repository
+🐍 Python version 3.12.3
 
+1️⃣ Clone the Repository
 git clone  https://github.com/asifkhan-hub/Real-Time-Vehicle-Speed-Detection-Tracking-with-Yolov11-Django
 
 2️⃣ Install Dependencies
