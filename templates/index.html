@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Streaming</title>
+</head>
+<body>
+    <h1>Live Video Stream with YOLO Detection</h1>
+    <select id="class-select">
+        <option value="0">Person</option>
+        <option value="1">Car</option>
+        <!-- Add more class options here as per YOLO model's class list -->
+    </select>
+    <button onclick="startStream()">Start Stream</button>
+
+    <div>
+        <img id="video-feed" style="max-width: 100%;"/>
+    </div>
+
+    <script>
+        let socket;
+
+        function startStream() {
+            const classId = document.getElementById('class-select').value;
+            socket = new WebSocket(`ws://localhost:8000/ws/video`);
+
+            socket.onopen = () => {
+                console.log('WebSocket connection established');
+                socket.send(classId); // Send the selected class ID to the server
+            };
+
+            socket.onmessage = (event) => {
+                const frameB64 = event.data;  // Base64 encoded frame received from server
+                const image = new Image();
+                image.src = 'data:image/jpeg;base64,' + frameB64;
+                image.onload = () => {
+                    // Update the displayed image with the new frame
+                    document.getElementById('video-feed').src = image.src;
+                };
+            };
+
+            socket.onclose = () => {
+                console.log('WebSocket connection closed');
+            };
+        }
+    </script>
+</body>
+</html>

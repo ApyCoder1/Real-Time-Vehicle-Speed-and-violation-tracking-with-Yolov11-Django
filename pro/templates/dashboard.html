@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Vehicle Speed Violation Tracking System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- FontAwesome Icons -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e9eef5, #f4f7fc);
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 50px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 600;
+        }
+
+        /* Card Styling */
+        .card {
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 12px 12px 0 0;
+            text-align: center;
+        }
+
+        .card-body {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 0 0 12px 12px;
+            color: #333;
+        }
+
+        /* Summary Section */
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .summary div {
+            background-color: #007bff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 30%;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            color: white;
+        }
+
+        .summary div:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .summary div h4 {
+            font-size: 1.6rem;
+        }
+
+        .summary div p {
+            font-size: 1.4rem;
+            margin-top: 10px;
+        }
+
+        /* Icon Styling */
+        .summary div i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        /* List Group Styling */
+        .list-group-item {
+            background-color: #f4f7fc;
+            border: none;
+            color: #333;
+            padding: 12px;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .list-group-item:hover {
+            background-color: #dbe5f1;
+        }
+
+        /* Chart Styling */
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+
+        /* Custom Scrollbar */
+        .list-group {
+            padding-left: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .list-group::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .list-group::-webkit-scrollbar-thumb {
+            background-color: #007bff;
+            border-radius: 10px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 12px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .summary div {
+                width: 48%;
+            }
+
+            .summary {
+                gap: 10px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Real-Time Vehicle Speed Violation Tracking System</h1>
+
+        <!-- Summary Section -->
+        <div class="summary">
+            <!-- Total Vehicles Card -->
+            <div>
+                <i class="fas fa-car"></i>
+                <h4>Total Vehicles</h4>
+                <p>{{ total_vehicles }}</p>
+            </div>
+
+            <!-- Average Speed Card -->
+            <div>
+                <i class="fas fa-tachometer-alt"></i>
+                <h4>Average Speed</h4>
+                <p>{{ avg_speed }} km/h</p>
+            </div>
+
+            <!-- Speed Violations Card -->
+            <div>
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4>Speed Violations</h4>
+                <p>{{ speed_violations }}</p>
+            </div>
+        </div>
+
+        <!-- Top 5 Fastest Vehicles -->
+        <div class="card">
+            <div class="card-header">Top 5 Fastest Vehicles</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for record in top_5_fastest %}
+                    <li class="list-group-item">Track ID: {{ record.track_id }} - Speed: {{ record.speed }} km/h, No Plate: {{ record.numberplate }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Vehicles by Time of Day -->
+        <div class="card">
+            <div class="card-header">Vehicles by Time of Day</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">Morning (6AM-12PM): {{ morning }} vehicles</li>
+                    <li class="list-group-item">Afternoon (12PM-6PM): {{ afternoon }} vehicles</li>
+                    <li class="list-group-item">Evening (6PM-12AM): {{ evening }} vehicles</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Recent Records -->
+        <div class="card">
+            <div class="card-header">Recent Records</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for record in recent_records %}
+                    <li class="list-group-item">Track ID: {{ record.track_id }} - Speed: {{ record.speed }} km/h, Time: {{ record.time }}, No Plate: {{ record.numberplate }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Speed Distribution Chart -->
+        <div class="card">
+            <div class="card-header">Speed Distribution Chart</div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="speedChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 ApyCoder. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        var ctx = document.getElementById('speedChart').getContext('2d');
+        var speedData = {
+            labels: [{% for item in speed_distribution %}"{{ item.speed }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Vehicle Count by Speed',
+                data: [{% for item in speed_distribution %}{{ item.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        var speedChart = new Chart(ctx, {
+            type: 'bar',
+            data: speedData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
